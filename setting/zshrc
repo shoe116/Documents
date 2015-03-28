@@ -1,0 +1,419 @@
+# ~/.zshrc: system-wide .zshrc file for zsh(1).
+#
+# This file is sourced only for interactive shells. It
+# should contain commands to set up aliases, functions,
+# options, key bindings, etc.
+#
+# Global Order: zshenv, zprofile, zshrc, zlogin
+
+# Last modified: <2012-08-01(Wed) 14:10:34>
+
+fpath=($HOME/.functions ${fpath})
+# autoload -U $HOME/.functions/*(:t)
+
+# 設定ファイル読み込み
+if [ -f ~/.profile ];
+  then source ~/.profile
+fi
+# alias
+export EDITOR=/Applications/MacVim.app/Contents/MacOS/Vim
+alias vi='env LANG=ja_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "$@"'
+alias vim='env LANG=ja_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "$@"'
+alias screen="screen -D -RR -U"
+alias bash="exec bash -l"
+###############################################
+# Keybind #
+###############################################
+# bindkey -v # vi-like keybind
+# bindkey -e # Emacs-like keybind
+
+###############################################
+# Completion options #
+###############################################
+# 色付け
+autoload -U colors
+colors
+
+# 標準の補完設定
+autoload -U compinit
+compinit -u
+
+# predict
+# autoload -U predict-on
+# predict-on
+
+# ディレクトリ名を入力するだけでカレントディレクトリを変更
+setopt auto_cd
+
+# タブキー連打で補完候補を順に表示
+setopt auto_menu
+
+# 自動修正機能(候補を表示)
+#setopt correct
+
+# 補完候補を詰めて表示
+setopt list_packed
+# 補完候補一覧でファイルの種別を識別マーク表示(ls -F の記号)
+setopt list_types
+
+# パスの最後に付くスラッシュを自動的に削除しない
+setopt noautoremoveslash
+
+# = 以降でも補完できるようにする( --prefix=/usr 等の場合)
+setopt magic_equal_subst
+
+# 補完候補リストの日本語を正しく表示
+setopt print_eight_bit
+
+# smart-insert-last-word の設定
+# Ctrl+] で一つ前のコマンドの最後の単語を挿入
+autoload smart-insert-last-word
+zle -N insert-last-word smart-insert-last-word
+zstyle :insert-last-word match \
+'*([^[:space:]][[:alpha:]/\\]|[[:alpha:]/\\][^[:space:]])*'
+bindkey '^]' insert-last-word
+
+################################################
+# zstyle #
+################################################
+# 補完侯補をEmacsのキーバインドで動き回る
+zstyle ':completion:*:default' menu select=1
+# vim 風コマンド使用
+bindkey -v
+
+# 補完の時に大文字小文字を区別しない(但し、大文字を打った場合は小文字に変換しない)
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+
+# lsコマンドの補完候補にも色付き表示
+# eval `dircolors`
+zstyle ':completion:*:default' list-colors ${LS_COLORS}
+#zstyle ':completion:*' list-colors ''
+
+# kill の候補にも色付き表示
+zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([%0-9]#)*=0=01;31'
+
+###############################################
+# 履歴関係 #
+###############################################
+# ヒストリー機能
+HISTFILE=$HOME/.zsh_history # ヒストリファイルを指定
+HISTSIZE=100000 # ヒストリに保存するコマンド数
+SAVEHIST=100000 # ヒストリファイルに保存するコマンド数
+setopt hist_ignore_all_dups # 重複するコマンド行は古い方を削除
+setopt hist_ignore_dups # 直前と同じコマンドラインはヒストリに追加しない
+setopt share_history # コマンド履歴ファイルを共有する
+setopt append_history # 履歴を追加 (毎回 .zsh_history を作るのではなく)
+setopt inc_append_history # 履歴をインクリメンタルに追加
+setopt hist_no_store # historyコマンドは履歴に登録しない
+setopt hist_reduce_blanks # 余分な空白は詰めて記録
+setopt hist_ignore_space # 先頭がスペースの場合、ヒストリに追加しない
+
+# cd - と入力してTabキーで今までに移動したディレクトリを一覧表示
+setopt auto_pushd
+
+# ディレクトリスタックに重複する物は古い方を削除
+setopt pushd_ignore_dups
+
+# コマンド履歴の検索機能の設定
+# ^[ は「エスケープ」
+# viなら Ctrl-v ESC
+# Emacsなら Ctrl-q ESC
+# viで編集する場合
+# 上2行は Ctrl-v を押下した後、希望のキーを押下
+# 下2行は「エスケープ」の後にキーの端末コードを入力
+autoload history-search-end
+zle -N history-beginning-search-backward-end history-search-end
+zle -N history-beginning-search-forward-end history-search-end
+bindkey "^[OA" history-beginning-search-backward-end
+bindkey "^[OB" history-beginning-search-forward-end
+bindkey "^[[A" history-beginning-search-backward-end
+bindkey "^[[B" history-beginning-search-forward-end
+# 複数行コマンドの場合、上記の設定だと少々不都合
+# tcshの様にする場合は以下のようにする
+#bindkey "^P" history-beginning-search-backward-end
+#bindkey "^N" history-beginning-search-forward-end
+
+# 先頭マッチのヒストリサーチ
+bindkey "^P" history-beginning-search-backward
+bindkey "^N" history-beginning-search-forward
+
+# インクリメンタルなヒストリサーチ
+bindkey "^R" history-incremental-search-backward
+bindkey "^S" history-incremental-search-forward
+
+# 全履歴の一覧を出力する
+function history-all { history -E 1 }
+
+###############################################
+# プロンプト関係 #
+###############################################
+# 文字列末尾に改行コードが無い場合でも表示する
+unsetopt promptcr
+
+# コピペの時rpromptを非表示する
+#setopt transient_rprompt
+
+# プロンプトで色を使う
+setopt prompt_subst
+
+#prompt='${WINDOW:+"$WINDOW:"}%{$fg[green]%}%n@%m%{$reset_color%}%{$fg[cyan]%}[%!]%{$reset_color%}%(!.#.$) '
+#rprompt='%{$fg[yellow]%}[%~]%{$reset_color%}'
+#prompt=$'${WINDOW:+"$WINDOW:"}%{$fg[green]%}%n@%m%{$reset_color%} %{$fg[cyan]%}(%!)%{$reset_color%} %{$fg[yellow]%}[%~]%{$reset_color%} \n%(!.#.$) '
+#prompt='%m%(!.#.$) '
+#rrompt="[%m - %T]"
+#prompt=$'%{$fg[green]%}[%m:%~]%{$reset_color%}''$(get_git_prompt_info)'$' %{$fg[yellow]%}%T%{$reset_color%}\n/ _ / X < '
+case ${UID} in
+0)
+PROMPT="[%{${fg[blue]}%}%n@%m%{${reset_color}%}] %{${fg[blue]}%}#%{${reset_color}%} "
+PROMPT2="%B%{${fg[blue]}%}%_#%{${reset_color}%}%b "
+SPROMPT="%B%{${fg[blue]}%}%r is correct? [n,y,a,e]:%{${reset_color}%}%b "
+RPROMPT="%{${fg[blue]}%}[%/]%{${reset_color}%}"
+;;
+*)
+PROMPT=$'%{$fg[cyan]%}[%m:%~]%{$reset_color%}''$(get_git_prompt_info)'$' %{$fg[yellow]%}%T%{$reset_color%}\n${WINDOW:+"$WINDOW:"}%{$fg[green]%}%n%{$reset_color%}%{$fg[yellow]%}[%!]%{$reset_color%}%(!.#.$) '
+;;
+esac
+# PROMPT="[%n@%m] %{${fg[blue]}%}#%{${reset_color}%} "
+# PROMPT2="%B%{${fg[blue]}%}%_#%{${reset_color}%}%b "
+# SPROMPT="%B%{${fg[blue]}%}%r is correct? [n,y,a,e]:%{${reset_color}%}%b "
+# RPROMPT="%{${fg[blue]}%}[%/]%{${reset_color}%}"
+
+
+###############################################
+# エイリアス #
+###############################################
+## エイリアスファイルがあれば読み込む
+if [ -e ~/.zsh_aliases ]; then
+source ~/.zsh_aliases
+fi
+
+# alias を展開して補完
+setopt complete_aliases
+
+###############################################
+# オプション #
+###############################################
+# カッコの対応などを自動的に補完する
+setopt auto_param_keys
+
+# ディレクトリ名の補完で末尾の / を自動的に付加し、次の補完に備える
+setopt auto_param_slash
+
+# 最後がディレクトリ名で終わっている場合末尾の / を自動的に取り除く
+#setopt auto_remove_slash
+
+# サスペンド中のプロセスと同じコマンド名を実行した場合はリジュームする
+setopt auto_resume
+
+# ビープ音を鳴らさないようにする
+setopt NO_beep
+
+# {a-c} を a b c に展開する機能を使えるようにする
+
+# 内部コマンドの echo を BSD 互換にする
+#setopt bsd_echo
+
+# シンボリックリンクは実体を追うようになる
+#setopt chase_links
+
+# 既存のファイルを上書きしないようにする
+#setopt clobber
+
+# コマンドのスペルチェックをする
+setopt correct
+
+# コマンドライン全てのスペルチェックをする
+#setopt correct_all
+
+# =command を command のパス名に展開する
+setopt equals
+
+# ファイル名で #, ~, ^ の 3 文字を正規表現として扱う
+setopt extended_glob
+
+# zsh の開始・終了時刻をヒストリファイルに書き込む
+#setopt extended_history
+
+# Ctrl+S/Ctrl+Q によるフロー制御を使わないようにする
+setopt NO_flow_control
+
+# 各コマンドが実行されるときにパスをハッシュに入れる
+#setopt hash_cmds
+
+# 直前と同じコマンドラインはヒストリに追加しない
+setopt hist_ignore_dups
+
+# ヒストリを呼び出してから実行する間に一旦編集できる状態になる
+setopt hist_verify
+
+# シェルが終了しても裏ジョブに HUP シグナルを送らないようにする
+setopt NO_hup
+
+# Ctrl+D では終了しないようになる（exit, logout などを使う）
+setopt ignore_eof
+
+# コマンドラインでも # 以降をコメントと見なす
+setopt interactive_comments
+
+# 内部コマンド jobs の出力をデフォルトで jobs -l にする
+setopt long_list_jobs
+
+# メールスプール $MAIL が読まれていたらワーニングを表示する
+#setopt mail_warning
+
+# ファイル名の展開でディレクトリにマッチした場合末尾に / を付加する
+setopt mark_dirs
+
+# 補完候補が複数ある時、一覧表示 (auto_list) せず、すぐに最初の候補を補完する
+# setopt menu_complete
+
+# 複数のリダイレクトやパイプなど、必要に応じて tee や cat の機能が使われる
+setopt multios
+
+# ファイル名の展開で、辞書順ではなく数値的にソートされるようになる
+setopt numeric_glob_sort
+
+# コマンド名に / が含まれているとき PATH 中のサブディレクトリを探す
+#setopt path_dirs
+
+# 8 ビット目を通すようになり、日本語のファイル名などを見れるようになる
+setopt print_eightbit
+
+# 戻り値が 0 以外の場合終了コードを表示する
+# setopt print_exit_value
+
+# ディレクトリスタックに同じディレクトリを追加しないようになる
+#setopt pushd_ignore_dups
+
+# pushd を引数なしで実行した場合 pushd $HOME と見なされる
+#setopt pushd_to_home
+
+# rm * などの際、本当に全てのファイルを消して良いかの確認しないようになる
+#setopt rm_star_silent
+
+# rm_star_silent の逆で、10 秒間反応しなくなり、頭を冷ます時間が与えられる
+# setopt rm_star_wait
+
+# for, repeat, select, if, function などで簡略文法が使えるようになる
+setopt short_loops
+
+# デフォルトの複数行コマンドライン編集ではなく、１行編集モードになる
+#setopt single_line_zle
+
+# コマンドラインがどのように展開され実行されたかを表示するようになる
+#setopt xtrace
+
+# シェルのプロセスごとに履歴を共有
+setopt share_history
+
+# history (fc -l) コマンドをヒストリリストから取り除く。
+setopt hist_no_store
+
+# cd -[tab] でpushd
+setopt autopushd
+
+# cd ^ でcd .. する
+function cdup() {
+echo
+cd .. && ls
+zle reset-prompt
+}
+zle -N cdup
+bindkey '\^' cdup
+
+# cd したあとlsする
+function cd() {builtin cd $@ && ls }
+
+# magics http://www.jukie.net/~bart/blog/20071219221358
+typeset -ga preexec_functions
+typeset -ga precmd_functions
+typeset -ga chpwd_functions
+
+########################################################################
+# git
+########################################################################
+export __CURRENT_GIT_BRANCH=""
+parse_git_branch() {
+git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'
+}
+
+preexec_functions+='zsh_preexec_update_git_vars'
+zsh_preexec_update_git_vars() { # FIXME 1コマンド分遅れる
+local hist
+local histcmd
+histcmd=`expr $HISTCMD - 1` 
+hist="$(history $histcmd)"
+case $hist in 
+*git*)
+echo $hist >> /tmp/git-hist
+export __CURRENT_GIT_BRANCH="$(parse_git_branch)"
+;;
+esac
+}
+
+chpwd_functions+='zsh_chpwd_update_git_vars'
+zsh_chpwd_update_git_vars() {
+export __CURRENT_GIT_BRANCH="$(parse_git_branch)"
+}
+
+get_git_prompt_info() {
+if [ -n "$__CURRENT_GIT_BRANCH" ]; then
+echo " ($__CURRENT_GIT_BRANCH)"
+fi
+}
+
+# commit, push 忘れを教えてくれる
+# http://d.hatena.ne.jp/hirose31/20090703/1246619720
+__git_reminder() {
+[ -d "$PWD/.git" ] || return
+M=
+git status | grep -q '^nothing to commit' 2>/dev/null || M=$M'*'
+[ ! -z "$(git log --pretty=oneline origin..HEAD 2>/dev/null)" ] && M=$M'^'
+echo -n "$M"
+}
+
+_colesc="\[\e["
+_cse="\]"
+_colreset="${_colesc}0m${_cse}"
+
+# if [ -r "$HOME/.bash_completion.d/git" ]; then
+# PS1="${PS1}[\$(__git_ps1 \"${_colesc};1m${_cse}%s${_colesc}31;1m${_cse}\$(__git_reminder)${_colreset})\")\w]\\$ "
+# else
+# PS1="${PS1}[\w]\\$ "
+# fi
+
+
+########################################################################
+# Mercurial
+# ref: https://bitbucket.org/Josh/mercurial-for-zsh/
+########################################################################
+
+# Append hg functions needed for prompt.
+preexec_functions+='preexec_update_hg_vars'
+precmd_functions+='precmd_update_hg_vars'
+chpwd_functions+='chpwd_update_hg_vars'
+
+########################################################################
+# terminal multiplexer
+########################################################################
+# common
+MYTERM=screen-256color
+
+# if [ "$TERM" = "$M
+
+# google hoge で検索
+function google() {
+  local str opt
+  if [ $# != 0 ]; then
+    for i in $*; do
+      str="$str+$i"
+    done
+    str=`echo $str | sed 's/^\+//'`
+    opt='search?num=50&hl=ja&lr=lang_ja'
+    opt="${opt}&q=${str}"
+  fi
+  w3m http://www.google.co.jp/$opt
+}
+
+export NVM_DIR="/Users/$USER/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm

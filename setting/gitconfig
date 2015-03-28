@@ -1,0 +1,14 @@
+[user]
+	name = shoe116
+    email = #set-email#
+[core]
+  editor = vim
+[filter "media"]
+	clean = git-media-clean %f
+	smudge = git-media-smudge %f
+[alias]
+	st = status
+	co = checkout
+[diff]
+    tool = vimdiff
+    algorithm = histogram]
