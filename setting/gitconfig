@@ -9,6 +9,7 @@
 [alias]
 	st = status
 	co = checkout
+    pull = pull --prune
 [diff]
     tool = vimdiff
     algorithm = histogram
