@@ -11,4 +11,4 @@
 	co = checkout
 [diff]
     tool = vimdiff
-    algorithm = histogram]
+    algorithm = histogram
